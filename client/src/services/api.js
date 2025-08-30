@@ -1,3 +1,4 @@
+// src/services/api.js
 import axios from 'axios';
 
 const API_BASE_URL = 'http://localhost:3000/api/v1';
@@ -33,6 +34,12 @@ export const superAdminAPI = {
   getUsers: async (params = {}) => {
     const response = await api.get('/superadmin/users', { params });
     return response.data;
+  },
+  
+  // Fix: Add getUserById method that Dashboard expects
+  getUserById: async (userId) => {
+    const response = await api.get(`/superadmin/users/${userId}`);
+    return { user: response.data }; // Wrap in user object as Dashboard expects
   },
   
   getUser: async (userId) => {

@@ -10,6 +10,10 @@ const Dashboard = ({ user, onLogout }) => {
   const [analytics, setAnalytics] = useState({});
   const [loading, setLoading] = useState(false);
   const [showCreateUser, setShowCreateUser] = useState(false);
+  const [showEditUser, setShowEditUser] = useState(false);
+  const [editingUser, setEditingUser] = useState(null);
+  const [showUserDetail, setShowUserDetail] = useState(false);
+  const [selectedUser, setSelectedUser] = useState(null);
   const [newUser, setNewUser] = useState({ name: '', email: '', password: '', roleIds: [] });
 
   // Load initial data
@@ -68,6 +72,24 @@ const Dashboard = ({ user, onLogout }) => {
     }
   };
 
+  const updateUser = async (e) => {
+    e.preventDefault();
+    if (!editingUser) return;
+    
+    try {
+      await superAdminAPI.updateUser(editingUser.id, {
+        name: editingUser.name,
+        email: editingUser.email,
+        roleIds: editingUser.roleIds
+      });
+      setShowEditUser(false);
+      setEditingUser(null);
+      loadUsers();
+    } catch (error) {
+      alert('Failed to update user: ' + (error.response?.data?.error || error.message));
+    }
+  };
+
   const deleteUser = async (userId) => {
     if (!window.confirm('Are you sure you want to delete this user?')) return;
     
@@ -76,6 +98,24 @@ const Dashboard = ({ user, onLogout }) => {
       loadUsers();
     } catch (error) {
       alert('Failed to delete user: ' + (error.response?.data?.error || error.message));
+    }
+  };
+
+  const handleEditUser = (user) => {
+    setEditingUser({
+      ...user,
+      roleIds: user.UserRoles ? user.UserRoles.map(ur => ur.roleId) : []
+    });
+    setShowEditUser(true);
+  };
+
+  const handleViewUser = async (userId) => {
+    try {
+      const userData = await superAdminAPI.getUserById(userId);
+      setSelectedUser(userData.user);
+      setShowUserDetail(true);
+    } catch (error) {
+      alert('Failed to load user details: ' + (error.response?.data?.error || error.message));
     }
   };
 
@@ -337,7 +377,21 @@ const Dashboard = ({ user, onLogout }) => {
                             </td>
                             <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
                               <div className="flex space-x-2">
-                                <button className="text-blue-600 hover:text-blue-900 transition-colors">
+                                <button 
+                                  onClick={() => handleViewUser(user.id)}
+                                  className="text-indigo-600 hover:text-indigo-900 transition-colors"
+                                  title="View Details"
+                                >
+                                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                                  </svg>
+                                </button>
+                                <button 
+                                  onClick={() => handleEditUser(user)}
+                                  className="text-blue-600 hover:text-blue-900 transition-colors"
+                                  title="Edit User"
+                                >
                                   <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
                                   </svg>
@@ -346,6 +400,7 @@ const Dashboard = ({ user, onLogout }) => {
                                   onClick={() => deleteUser(user.id)}
                                   className="text-red-600 hover:text-red-900 transition-colors"
                                   disabled={user.id === 1} // Can't delete super admin
+                                  title="Delete User"
                                 >
                                   <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
@@ -530,6 +585,211 @@ const Dashboard = ({ user, onLogout }) => {
                 </button>
               </div>
             </form>
+          </div>
+        </div>
+      )}
+
+      {/* Edit User Modal */}
+      {showEditUser && editingUser && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+          <div className="bg-white rounded-xl max-w-md w-full p-6">
+            <div className="flex justify-between items-center mb-6">
+              <h3 className="text-lg font-semibold text-gray-900">Edit User</h3>
+              <button
+                onClick={() => {
+                  setShowEditUser(false);
+                  setEditingUser(null);
+                }}
+                className="text-gray-400 hover:text-gray-600"
+              >
+                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+            </div>
+            
+            <form onSubmit={updateUser} className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Name</label>
+                <input
+                  type="text"
+                  required
+                  value={editingUser.name}
+                  onChange={(e) => setEditingUser({...editingUser, name: e.target.value})}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                />
+              </div>
+              
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Email</label>
+                <input
+                  type="email"
+                  required
+                  value={editingUser.email}
+                  onChange={(e) => setEditingUser({...editingUser, email: e.target.value})}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                />
+              </div>
+              
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Roles</label>
+                <div className="space-y-2 max-h-32 overflow-y-auto border border-gray-300 rounded-lg p-3">
+                  {roles.map((role) => (
+                    <label key={role.id} className="flex items-center">
+                      <input
+                        type="checkbox"
+                        checked={editingUser.roleIds.includes(role.id)}
+                        onChange={(e) => {
+                          if (e.target.checked) {
+                            setEditingUser({
+                              ...editingUser,
+                              roleIds: [...editingUser.roleIds, role.id]
+                            });
+                          } else {
+                            setEditingUser({
+                              ...editingUser,
+                              roleIds: editingUser.roleIds.filter(id => id !== role.id)
+                            });
+                          }
+                        }}
+                        className="rounded border-gray-300 text-blue-600 shadow-sm focus:border-blue-300 focus:ring focus:ring-blue-200 focus:ring-opacity-50"
+                      />
+                      <span className="ml-2 text-sm text-gray-700">{role.name}</span>
+                    </label>
+                  ))}
+                </div>
+              </div>
+              
+              <div className="flex space-x-3 pt-4">
+                <button
+                  type="submit"
+                  className="flex-1 bg-blue-600 text-white py-2 px-4 rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors"
+                >
+                  Update User
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setShowEditUser(false);
+                    setEditingUser(null);
+                  }}
+                  className="flex-1 bg-gray-300 text-gray-700 py-2 px-4 rounded-lg hover:bg-gray-400 focus:outline-none focus:ring-2 focus:ring-gray-500 transition-colors"
+                >
+                  Cancel
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* User Detail Modal */}
+      {showUserDetail && selectedUser && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+          <div className="bg-white rounded-xl max-w-2xl w-full p-6 max-h-[90vh] overflow-y-auto">
+            <div className="flex justify-between items-center mb-6">
+              <h3 className="text-lg font-semibold text-gray-900">User Details</h3>
+              <button
+                onClick={() => {
+                  setShowUserDetail(false);
+                  setSelectedUser(null);
+                }}
+                className="text-gray-400 hover:text-gray-600"
+              >
+                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+            </div>
+            
+            <div className="space-y-6">
+              {/* User Profile */}
+              <div className="flex items-center space-x-4 p-4 bg-gray-50 rounded-lg">
+                <div className="w-16 h-16 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center">
+                  <span className="text-white font-bold text-xl">
+                    {selectedUser.name.split(' ').map(n => n[0]).join('')}
+                  </span>
+                </div>
+                <div>
+                  <h4 className="text-xl font-semibold text-gray-900">{selectedUser.name}</h4>
+                  <p className="text-gray-600">{selectedUser.email}</p>
+                  <div className="flex space-x-2 mt-2">
+                    {selectedUser.roles.map((role) => (
+                      <span
+                        key={role}
+                        className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
+                          role === 'superadmin' 
+                            ? 'bg-red-100 text-red-800' 
+                            : 'bg-blue-100 text-blue-800'
+                        }`}
+                      >
+                        {role}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+              </div>
+
+              {/* User Stats */}
+              <div className="grid grid-cols-2 gap-4">
+                <div className="p-4 border border-gray-200 rounded-lg">
+                  <div className="text-sm text-gray-500">Member Since</div>
+                  <div className="text-lg font-semibold text-gray-900">
+                    {new Date(selectedUser.createdAt).toLocaleDateString()}
+                  </div>
+                </div>
+                <div className="p-4 border border-gray-200 rounded-lg">
+                  <div className="text-sm text-gray-500">Last Login</div>
+                  <div className="text-lg font-semibold text-gray-900">
+                    {selectedUser.lastLogin 
+                      ? new Date(selectedUser.lastLogin).toLocaleDateString()
+                      : 'Never'
+                    }
+                  </div>
+                </div>
+              </div>
+
+              {/* Activity Summary */}
+              {selectedUser.activitySummary && (
+                <div className="p-4 border border-gray-200 rounded-lg">
+                  <h5 className="font-medium text-gray-900 mb-3">Activity Summary</h5>
+                  <div className="grid grid-cols-2 gap-4 text-sm">
+                    <div>
+                      <span className="text-gray-500">Total Logins:</span>
+                      <span className="ml-2 font-semibold">{selectedUser.activitySummary.loginCount || 0}</span>
+                    </div>
+                    <div>
+                      <span className="text-gray-500">Last Activity:</span>
+                      <span className="ml-2 font-semibold">
+                        {selectedUser.activitySummary.lastActivity 
+                          ? new Date(selectedUser.activitySummary.lastActivity).toLocaleDateString()
+                          : 'N/A'
+                        }
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* Action Buttons */}
+              <div className="flex space-x-3 pt-4">
+                <button
+                  onClick={() => {
+                    setShowUserDetail(false);
+                    handleEditUser(selectedUser);
+                  }}
+                  className="flex-1 bg-blue-600 text-white py-2 px-4 rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors"
+                >
+                  Edit User
+                </button>
+                <button
+                  onClick={() => setShowUserDetail(false)}
+                  className="flex-1 bg-gray-300 text-gray-700 py-2 px-4 rounded-lg hover:bg-gray-400 focus:outline-none focus:ring-2 focus:ring-gray-500 transition-colors"
+                >
+                  Close
+                </button>
+              </div>
+            </div>
           </div>
         </div>
       )}

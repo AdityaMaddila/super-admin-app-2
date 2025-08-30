@@ -41,7 +41,8 @@ router.get('/users', async (req, res) => {
     const include = [{
       model: Role,
       where: role ? { name: role } : undefined,
-      required: !!role
+      required: !!role,
+      through: { as: 'UserRoles' } // Add alias for junction table
     }];
 
     const { count, rows } = await User.findAndCountAll({
@@ -58,6 +59,7 @@ router.get('/users', async (req, res) => {
         name: user.name,
         email: user.email,
         roles: user.Roles.map(r => r.name),
+        UserRoles: user.Roles.map(r => ({ roleId: r.id })), // Add for frontend compatibility
         lastLogin: user.lastLogin,
         createdAt: user.createdAt
       })),
@@ -78,7 +80,10 @@ router.get('/users', async (req, res) => {
 router.get('/users/:id', async (req, res) => {
   try {
     const user = await User.findByPk(req.params.id, {
-      include: [Role]
+      include: [{
+        model: Role,
+        through: { as: 'UserRoles' }
+      }]
     });
 
     if (!user) {
@@ -89,10 +94,16 @@ router.get('/users/:id', async (req, res) => {
       id: user.id,
       name: user.name,
       email: user.email,
-      roles: user.Roles.map(r => ({ id: r.id, name: r.name })),
+      roles: user.Roles.map(r => r.name), // For display
+      Roles: user.Roles.map(r => ({ id: r.id, name: r.name })), // For editing
+      UserRoles: user.Roles.map(r => ({ roleId: r.id })), // For frontend compatibility
       lastLogin: user.lastLogin,
       createdAt: user.createdAt,
-      updatedAt: user.updatedAt
+      updatedAt: user.updatedAt,
+      activitySummary: {
+        loginCount: 0, // You can implement this based on your audit logs
+        lastActivity: user.lastLogin
+      }
     });
   } catch (error) {
     console.error('Get user error:', error);
@@ -157,28 +168,45 @@ router.post('/users', async (req, res) => {
   }
 });
 
-// PUT /api/v1/superadmin/users/:id - Update user
+// PUT /api/v1/superadmin/users/:id - Update user (FIXED to handle roles)
 router.put('/users/:id', async (req, res) => {
   try {
-    const { name, email } = req.body;
+    const { name, email, roleIds } = req.body;
     
-    const user = await User.findByPk(req.params.id);
+    const user = await User.findByPk(req.params.id, {
+      include: [Role]
+    });
+    
     if (!user) {
       return res.status(404).json({ error: 'User not found' });
     }
 
-    // Update user
+    // Update basic user info
     await user.update({ name, email });
 
+    // Update roles if provided
+    if (roleIds && Array.isArray(roleIds)) {
+      // Clear existing roles and set new ones
+      await user.setRoles(roleIds);
+    }
+
     // Log audit event
-    await logAudit(req.user.userId, 'UPDATE_USER', 'User', user.id, { name, email });
+    await logAudit(req.user.userId, 'UPDATE_USER', 'User', user.id, { 
+      name, 
+      email, 
+      roleIds: roleIds || []
+    });
+
+    // Return updated user with roles
+    const updatedUser = await User.findByPk(user.id, { include: [Role] });
 
     res.json({
       message: 'User updated successfully',
       user: {
-        id: user.id,
-        name: user.name,
-        email: user.email
+        id: updatedUser.id,
+        name: updatedUser.name,
+        email: updatedUser.email,
+        roles: updatedUser.Roles.map(r => r.name)
       }
     });
   } catch (error) {
@@ -261,6 +289,34 @@ router.post('/roles', async (req, res) => {
   } catch (error) {
     console.error('Create role error:', error);
     res.status(500).json({ error: 'Failed to create role' });
+  }
+});
+
+// PUT /api/v1/superadmin/roles/:id - Update role
+router.put('/roles/:id', async (req, res) => {
+  try {
+    const { name, permissions } = req.body;
+    
+    const role = await Role.findByPk(req.params.id);
+    if (!role) {
+      return res.status(404).json({ error: 'Role not found' });
+    }
+
+    await role.update({ name, permissions });
+
+    await logAudit(req.user.userId, 'UPDATE_ROLE', 'Role', role.id, { name, permissions });
+
+    res.json({
+      message: 'Role updated successfully',
+      role: {
+        id: role.id,
+        name: role.name,
+        permissions: role.permissions
+      }
+    });
+  } catch (error) {
+    console.error('Update role error:', error);
+    res.status(500).json({ error: 'Failed to update role' });
   }
 });
 
