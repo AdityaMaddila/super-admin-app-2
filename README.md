@@ -1,134 +1,116 @@
-# Super Admin Backend & UI
+# Super Admin App
 
-A complete Super Admin system with user management, role-based access control, audit logging, and analytics.
+Complete user management system with roles, audit logging, and analytics.
 
-## Quick Start
+## Setup (Windows)
 
-### Prerequisites
-- Node.js 16+ 
-- PostgreSQL/MySQL database
-- npm or yarn
+### 1. Install & Configure
 
-### Setup
-
-1. **Clone and install dependencies:**
-```bash
-git clone <your-repo-url>
-cd super-admin-project
+```cmd
+git clone https://github.com/AdityaMaddila/super-admin-app-2.git
+cd super-admin-app-2
 npm install
 ```
 
-2. **Environment setup:**
-```bash
-cp .env.example .env
+Create `.env` file:
+```cmd
+echo DB_HOST=localhost > .env
+echo DB_USER=your_db_user >> .env
+echo DB_PASSWORD=your_db_password >> .env
+echo DB_NAME=superadmin_db >> .env
+echo JWT_SECRET=super-secret-jwt-key-minimum-32-characters-long >> .env
+echo PORT=3000 >> .env
 ```
 
-Edit `.env` with your database credentials:
-```
-DB_HOST=localhost
-DB_USER=your_db_user
-DB_PASSWORD=your_db_password
-DB_NAME=superadmin_db
-JWT_SECRET=your-super-secret-jwt-key-here
-PORT=3000
+### 2. Setup Frontend
+
+```cmd
+cd client
+npm install
+cd ..
 ```
 
-3. **Database setup:**
-```bash
-# Create database and run migrations
-npm run db:setup
+### 3. Initialize Database
 
-# Seed superadmin user
+```cmd
 npm run seed
 ```
 
-4. **Start the application:**
-```bash
-# Backend
-npm start
+This creates tables and adds superadmin user.
 
-# Frontend (separate terminal)
+### 4. Start Application
+
+Backend:
+```cmd
+npm start
+```
+
+Frontend (new terminal):
+```cmd
 cd client
 npm start
 ```
 
-### Default Credentials
-- **Email:** `superadmin@example.com`
-- **Password:** `Test1234!`
+## Login
 
-## API Endpoints
+Go to http://localhost:3001
 
-### Authentication
-- `POST /api/v1/auth/login` - Login with email/password
+- Email: `superadmin@example.com`
+- Password: `Test1234!`
 
-### Users Management
-- `GET /api/v1/superadmin/users` - List users (pagination, search)
-- `GET /api/v1/superadmin/users/:id` - Get user details
-- `POST /api/v1/superadmin/users` - Create new user
-- `PUT /api/v1/superadmin/users/:id` - Update user
-- `DELETE /api/v1/superadmin/users/:id` - Delete user
+## Required Scripts (add to package.json)
 
-### Roles Management  
-- `GET /api/v1/superadmin/roles` - List all roles
-- `POST /api/v1/superadmin/roles` - Create new role
-- `PUT /api/v1/superadmin/roles/:id` - Update role
-- `POST /api/v1/superadmin/assign-role` - Assign role to user
-
-### Audit & Analytics
-- `GET /api/v1/superadmin/audit-logs` - Get audit logs (filterable)
-- `GET /api/v1/superadmin/analytics/summary` - Basic analytics
-
-## Scripts
-
-```bash
-npm start          # Start backend server
-npm test           # Run unit tests  
-npm run seed       # Seed database with superadmin user
-npm run db:setup   # Setup database (run migrations)
+```json
+{
+  "scripts": {
+    "start": "node src/server.js",
+    "seed": "node scripts/seed.js",
+    "test": "jest"
+  }
+}
 ```
 
-## Project Structure
+## Troubleshooting
 
-```
-├── src/
-│   ├── models/          # Sequelize models
-│   ├── routes/          # API routes
-│   ├── middleware/      # Auth middleware
-│   ├── utils/           # Helper utilities
-│   └── app.js          # Express app setup
-├── client/             # React frontend
-├── scripts/            # Database seeds
-├── tests/              # Unit tests
-└── postman/            # Postman collection
-```
+**Database errors:** Update .env with correct database credentials
 
-## Frontend Features
+**Port conflicts:** Change PORT in .env
 
-- **Dashboard:** Analytics overview with user/role counts
-- **User Management:** Create, edit, delete, and view user details
-- **Role Management:** Assign/remove roles from users
-- **Audit Logs:** Track all system activities
-- **Responsive Design:** Works on desktop and mobile
+**Module errors:** Run `npm install` in both root and client folders
 
-## Testing
+**Seed fails:** Check your database connection and credentials
 
-The project includes unit tests for core functionality:
+## API Testing with Postman
 
-```bash
+### Import Collection
+1. Open Postman
+2. Click "Import" button
+3. Select `postman-collection.json` file
+4. Collection will appear in your sidebar
+
+### Test the APIs
+1. **First, run "Login" request**
+   - This automatically saves your auth token
+2. **Then test any other endpoints**
+   - Token is automatically added to requests
+
+### Available Tests
+- User CRUD operations
+- Role management
+- Audit log viewing
+- Analytics data
+
+## Unit Testing
+
+```cmd
 npm test
 ```
 
-Import `postman-collection.json` into Postman for API testing.
+## Features
 
-## Database Schema
-
-**Users:** `id, name, email, hashedPassword, lastLogin, createdAt, updatedAt`  
-**Roles:** `id, name, permissions[], createdAt`  
-**AuditLogs:** `id, actorUserId, action, targetType, targetId, details, createdAt`
-
-## Security Features
-
-- JWT authentication with role-based access control
-- Password hashing with bcrypt
-- Audit logging for all admin actions
-- Input validation and sanitization
+- User CRUD operations
+- Role management and assignment
+- Activity audit logging
+- Basic analytics dashboard
+- JWT authentication
+- Responsive React UI
