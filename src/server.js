@@ -1,4 +1,3 @@
-// src/server.js
 require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
@@ -11,11 +10,11 @@ const superadminRoutes = require('./routes/superadmin');
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-// Basic middleware
+
 app.use(cors());
 app.use(express.json());
 
-// Test route to make sure server works
+// Test route for health check
 app.get('/health', (req, res) => {
   res.json({ 
     status: 'Server is running!', 
@@ -33,10 +32,10 @@ app.use('/api/v1/superadmin', superadminRoutes);
 // Start server with database
 async function startServer() {
   try {
-    // Initialize database first
+
     await initDatabase();
     
-    // Then start the server
+
     app.listen(PORT, () => {
       console.log(`🚀 Server running on http://localhost:${PORT}`);
       console.log(`📊 Health check: http://localhost:${PORT}/health`);
@@ -48,7 +47,7 @@ async function startServer() {
   }
 }
 
-// Start everything
+
 startServer();
 
 module.exports = app;

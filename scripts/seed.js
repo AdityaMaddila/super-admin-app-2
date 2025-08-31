@@ -7,10 +7,10 @@ async function seedDatabase() {
   try {
     console.log('🌱 Starting database seed...');
     
-    // Initialize database
+    //initialize database connection
     await initDatabase();
 
-    // Create super admin role
+    // Super admin
     const [superAdminRole] = await Role.findOrCreate({
       where: { name: 'superadmin' },
       defaults: {
@@ -19,7 +19,7 @@ async function seedDatabase() {
       }
     });
 
-    // Create regular user role
+    // Regular user
     const [userRole] = await Role.findOrCreate({
       where: { name: 'user' },
       defaults: {
@@ -40,7 +40,7 @@ async function seedDatabase() {
       }
     });
 
-    // Assign super admin role
+
     await superAdmin.addRole(superAdminRole);
 
     // Create a test regular user
@@ -56,15 +56,15 @@ async function seedDatabase() {
 
     await testUser.addRole(userRole);
 
-    console.log('✅ Database seeded successfully!');
+    console.log('Database seeded successfully!');
     console.log('');
-    console.log('🔑 Login credentials:');
+    console.log(' Login credentials:');
     console.log('Super Admin: superadmin@example.com / Test1234!');
     console.log('Test User: user@example.com / password123');
     
     process.exit(0);
   } catch (error) {
-    console.error('❌ Seed failed:', error);
+    console.error('Seed failed:', error);
     process.exit(1);
   }
 }

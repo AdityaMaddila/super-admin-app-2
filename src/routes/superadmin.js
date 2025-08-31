@@ -1,4 +1,4 @@
-// src/routes/superadmin.js
+
 const express = require('express');
 const { User, Role, AuditLog } = require('../models');
 const { requireAuth, requireSuperAdmin } = require('../middleware/auth');
@@ -168,7 +168,7 @@ router.post('/users', async (req, res) => {
   }
 });
 
-// PUT /api/v1/superadmin/users/:id - Update user (FIXED to handle roles)
+// PUT /api/v1/superadmin/users/:id - Update user 
 router.put('/users/:id', async (req, res) => {
   try {
     const { name, email, roleIds } = req.body;
@@ -358,7 +358,6 @@ router.get('/audit-logs', async (req, res) => {
     const { page = 1, limit = 20, userId, action, startDate, endDate } = req.query;
     const offset = (page - 1) * limit;
 
-    // Build where conditions
     const where = {};
     if (userId) where.actorUserId = userId;
     if (action) where.action = action;
@@ -398,7 +397,7 @@ router.get('/audit-logs', async (req, res) => {
 
 // ANALYTICS ENDPOINT
 
-// GET /api/v1/superadmin/analytics/summary - Basic analytics
+// GET /api/v1/superadmin/analytics/summary 
 router.get('/analytics/summary', async (req, res) => {
   try {
     const sevenDaysAgo = new Date();

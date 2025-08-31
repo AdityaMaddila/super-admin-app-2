@@ -14,7 +14,7 @@ router.post('/login', async (req, res) => {
       return res.status(400).json({ error: 'Email and password are required' });
     }
 
-    // Find user with roles
+    // Find user
     const user = await User.findOne({
       where: { email },
       include: [Role]

@@ -1,11 +1,11 @@
-// src/models/index.js
+
 const { Sequelize, DataTypes } = require('sequelize');
 
-// Initialize SQLite database
+//SQLite database
 const sequelize = new Sequelize({
   dialect: 'sqlite',
   storage: process.env.DB_PATH || './database.sqlite',
-  logging: false // Set to console.log to see SQL queries
+  logging: false 
 });
 
 // User Model
@@ -79,26 +79,25 @@ const AuditLog = sequelize.define('AuditLog', {
   }
 });
 
-// Set up associations (relationships)
+// Set up relationships
 User.belongsToMany(Role, { through: 'UserRoles' });
 Role.belongsToMany(User, { through: 'UserRoles' });
 
 // Audit log associations
 AuditLog.belongsTo(User, { foreignKey: 'actorUserId', as: 'Actor' });
 
-// Database connection function
+// Database connection 
 async function initDatabase() {
   try {
     await sequelize.authenticate();
-    console.log('📦 Database connected successfully');
+    console.log('Database connected successfully');
     
-    // Sync models (creates tables if they don't exist)
     await sequelize.sync();
-    console.log('📋 Database tables synced');
+    console.log('Database tables synced');
     
     return sequelize;
   } catch (error) {
-    console.error('❌ Database connection failed:', error);
+    console.error('Database connection failed:', error);
     process.exit(1);
   }
 }

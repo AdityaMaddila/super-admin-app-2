@@ -1,4 +1,3 @@
-// src/utils/auth.js
 const jwt = require('jsonwebtoken');
 const bcrypt = require('bcryptjs');
 
@@ -15,12 +14,11 @@ function generateToken(user) {
   );
 }
 
-// Hash password
+// Hashing the password
 async function hashPassword(password) {
   return await bcrypt.hash(password, 10);
 }
 
-// Compare password
 async function comparePassword(password, hashedPassword) {
   return await bcrypt.compare(password, hashedPassword);
 }

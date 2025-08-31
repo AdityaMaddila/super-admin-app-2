@@ -1,9 +1,8 @@
-// src/services/api.js
+
 import axios from 'axios';
 
-const API_BASE_URL = 'http://localhost:3000/api/v1';
+const API_BASE_URL = 'http://localhost:3000/api/v1';// Port 3000 for backend
 
-// Create axios instance
 const api = axios.create({
   baseURL: API_BASE_URL,
   headers: {
@@ -20,7 +19,7 @@ api.interceptors.request.use((config) => {
   return config;
 });
 
-// Auth API calls
+// Authentication API calls
 export const authAPI = {
   login: async (email, password) => {
     const response = await api.post('/auth/login', { email, password });
@@ -30,16 +29,15 @@ export const authAPI = {
 
 // Super Admin API calls
 export const superAdminAPI = {
-  // Users
   getUsers: async (params = {}) => {
     const response = await api.get('/superadmin/users', { params });
     return response.data;
   },
   
-  // Fix: Add getUserById method that Dashboard expects
+
   getUserById: async (userId) => {
     const response = await api.get(`/superadmin/users/${userId}`);
-    return { user: response.data }; // Wrap in user object as Dashboard expects
+    return { user: response.data }; 
   },
   
   getUser: async (userId) => {
@@ -78,13 +76,11 @@ export const superAdminAPI = {
     return response.data;
   },
   
-  // Audit Logs
   getAuditLogs: async (params = {}) => {
     const response = await api.get('/superadmin/audit-logs', { params });
     return response.data;
   },
   
-  // Analytics
   getAnalytics: async () => {
     const response = await api.get('/superadmin/analytics/summary');
     return response.data;

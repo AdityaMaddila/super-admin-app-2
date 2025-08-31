@@ -1,4 +1,3 @@
-// client/src/components/Dashboard.jsx
 import { useState, useEffect } from 'react';
 import { superAdminAPI } from '../services/api';
 
@@ -16,7 +15,7 @@ const Dashboard = ({ user, onLogout }) => {
   const [selectedUser, setSelectedUser] = useState(null);
   const [newUser, setNewUser] = useState({ name: '', email: '', password: '', roleIds: [] });
 
-  // Load initial data
+  // Loading initial data over here
   useEffect(() => {
     loadAnalytics();
     if (activeTab === 'users') loadUsers();
@@ -38,7 +37,7 @@ const Dashboard = ({ user, onLogout }) => {
       const data = await superAdminAPI.getUsers();
       setUsers(data.users);
       
-      // Also load roles for user creation/editing
+      //Load roles for user management
       const rolesData = await superAdminAPI.getRoles();
       setRoles(rolesData.roles);
     } catch (error) {
@@ -119,7 +118,7 @@ const Dashboard = ({ user, onLogout }) => {
     }
   };
 
-  // Navigation tabs
+  // Navigation bar tabs
   const tabs = [
     { id: 'analytics', name: 'Dashboard', icon: '📊' },
     { id: 'users', name: 'Users', icon: '👥' },
@@ -184,7 +183,7 @@ const Dashboard = ({ user, onLogout }) => {
       <main className="max-w-7xl mx-auto py-8 px-4 sm:px-6 lg:px-8">
         {activeTab === 'analytics' && (
           <div className="space-y-8">
-            {/* Statistics Cards */}
+            {/* Stats Cards */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
               <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-200 hover:shadow-md transition-shadow">
                 <div className="flex items-center">
@@ -399,7 +398,7 @@ const Dashboard = ({ user, onLogout }) => {
                                 <button 
                                   onClick={() => deleteUser(user.id)}
                                   className="text-red-600 hover:text-red-900 transition-colors"
-                                  disabled={user.id === 1} // Can't delete super admin
+                                  disabled={user.id === 1}//to make sure we don't delete the primary admin
                                   title="Delete User"
                                 >
                                   <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -505,7 +504,7 @@ const Dashboard = ({ user, onLogout }) => {
         )}
       </main>
 
-      {/* Create User Modal */}
+      {/* Create User Popup Modal */}
       {showCreateUser && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
           <div className="bg-white rounded-xl max-w-md w-full p-6">
@@ -589,7 +588,7 @@ const Dashboard = ({ user, onLogout }) => {
         </div>
       )}
 
-      {/* Edit User Modal */}
+      {/* Edit User pop-up Modal */}
       {showEditUser && editingUser && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
           <div className="bg-white rounded-xl max-w-md w-full p-6">
@@ -683,7 +682,7 @@ const Dashboard = ({ user, onLogout }) => {
         </div>
       )}
 
-      {/* User Detail Modal */}
+      {/* User Detail Pop-up Modal */}
       {showUserDetail && selectedUser && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
           <div className="bg-white rounded-xl max-w-2xl w-full p-6 max-h-[90vh] overflow-y-auto">

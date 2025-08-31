@@ -1,6 +1,5 @@
-// tests/superadmin.test.js
 const request = require('supertest');
-const app = require('../src/app'); // Assuming your Express app is exported from app.js
+const app = require('../src/app');
 const { User, Role } = require('../src/models');
 const { hashPassword } = require('../src/utils/auth');
 
@@ -9,7 +8,6 @@ describe('Super Admin API', () => {
   let testUserId;
 
   beforeAll(async () => {
-    // Create test superadmin user
     const hashedPassword = await hashPassword('Test1234!');
     const superAdmin = await User.create({
       name: 'Test Admin',
@@ -115,7 +113,7 @@ describe('Super Admin API', () => {
   });
 
   afterAll(async () => {
-    // Cleanup test data
+    // Cleanup
     await User.destroy({ where: { email: ['testadmin@example.com', 'updated@example.com'] } });
     await Role.destroy({ where: { name: ['test-role'] } });
   });
