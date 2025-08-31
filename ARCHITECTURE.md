@@ -7,7 +7,7 @@ This Super Admin application follows a traditional 3-tier architecture with a Re
 ```
 ┌─────────────────┐    ┌─────────────────┐    ┌─────────────────┐
 │   React Client  │────│  Express API    │────│   SQL Database  │
-│   (Port 3001)   │    │   (Port 3000)   │    │   (PostgreSQL)  │
+│   (Port 5173)   │    │   (Port 3001)   │    │   (PostgreSQL)  │
 └─────────────────┘    └─────────────────┘    └─────────────────┘
 ```
 
