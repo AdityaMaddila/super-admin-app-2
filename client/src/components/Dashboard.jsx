@@ -631,27 +631,21 @@ const Dashboard = ({ user, onLogout }) => {
               </div>
               
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Roles</label>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Role</label>
                 <div className="space-y-2 max-h-32 overflow-y-auto border border-gray-300 rounded-lg p-3">
                   {roles.map((role) => (
                     <label key={role.id} className="flex items-center">
                       <input
-                        type="checkbox"
+                        type="radio"
+                        name="userRole"
                         checked={editingUser.roleIds.includes(role.id)}
-                        onChange={(e) => {
-                          if (e.target.checked) {
-                            setEditingUser({
-                              ...editingUser,
-                              roleIds: [...editingUser.roleIds, role.id]
-                            });
-                          } else {
-                            setEditingUser({
-                              ...editingUser,
-                              roleIds: editingUser.roleIds.filter(id => id !== role.id)
-                            });
-                          }
+                        onChange={() => {
+                          setEditingUser({
+                            ...editingUser,
+                            roleIds: [role.id]
+                          });
                         }}
-                        className="rounded border-gray-300 text-blue-600 shadow-sm focus:border-blue-300 focus:ring focus:ring-blue-200 focus:ring-opacity-50"
+                        className="border-gray-300 text-blue-600 shadow-sm focus:border-blue-300 focus:ring focus:ring-blue-200 focus:ring-opacity-50"
                       />
                       <span className="ml-2 text-sm text-gray-700">{role.name}</span>
                     </label>
