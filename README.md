@@ -53,7 +53,7 @@ npm start
 
 ## Login
 
-Go to http://localhost:3001
+Go to http://localhost:5173
 
 - Email: `superadmin@example.com`
 - Password: `Test1234!`
